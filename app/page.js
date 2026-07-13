@@ -1,66 +1,121 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { getProgettiConAllocazioni, getAllocazioniPerPersona } from "../lib/queries";
+import { statoBadgeClass, CAPACITY_PER_PERSONA_GG } from "../lib/risk";
 
-export default function Home() {
+export default async function Dashboard() {
+  let progetti = [];
+  let personeCapacity = [];
+  let errore = null;
+
+  try {
+    [progetti, personeCapacity] = await Promise.all([
+      getProgettiConAllocazioni(),
+      getAllocazioniPerPersona(),
+    ]);
+  } catch (e) {
+    errore = e.message || String(e);
+  }
+
+  if (errore) {
+    return (
+      <div className="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <div className="sub" style={{ color: "var(--risk)" }}>
+            Errore nel caricamento dati: {errore}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const progettiAttivi = progetti.filter(
+    (p) => p.stato !== "Live" && p.stato !== "Completato"
+  );
+  const progettiARischio = progetti.filter((p) => p.risk.level === "risk");
+  const effortAllocatoTotale = progetti.reduce((somma, p) => somma + p.effortTot, 0);
+
+  const capacityTotale = personeCapacity.length * CAPACITY_PER_PERSONA_GG;
+  const pianificatoTotale = personeCapacity.reduce(
+    (somma, p) => somma + p.totalePianificato,
+    0
+  );
+  const capacityResiduaPercent =
+    capacityTotale > 0
+      ? Math.round(((capacityTotale - pianificatoTotale) / capacityTotale) * 100)
+      : null;
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      <div className="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <div className="sub">Panoramica generale dei progetti monitorati</div>
+        </div>
+      </div>
+
+      <div className="kpis">
+        <div className="kpi">
+          <div className="label">Progetti attivi</div>
+          <div className="value">{progettiAttivi.length}</div>
+        </div>
+        <div className="kpi">
+          <div className="label">Progetti a rischio</div>
+          <div className="value">{progettiARischio.length}</div>
+        </div>
+        <div className="kpi">
+          <div className="label">Effort allocato (gg)</div>
+          <div className="value">{effortAllocatoTotale}</div>
+          <div className="delta">su {personeCapacity.length} risorse</div>
+        </div>
+        <div className="kpi">
+          <div className="label">Capacity residua</div>
+          <div className="value">
+            {capacityResiduaPercent !== null ? `${capacityResiduaPercent}%` : "—"}
+          </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Progetti a rischio</h2>
+          <span className="hint">
+            {progettiARischio.length} di {progetti.length}
+          </span>
+        </div>
+        {progettiARischio.length === 0 ? (
+          <p style={{ padding: "16px 18px", color: "var(--muted)" }}>
+            Nessun progetto a rischio al momento.
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Progetto</th>
+                <th>Stato</th>
+                <th>Quarter</th>
+                <th>Rischio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {progettiARischio.map((p) => (
+                <tr key={p.id_progetto}>
+                  <td>
+                    <div className="proj-id">{p.id_progetto}</div>
+                    <div className="proj-title">{p.descrizione}</div>
+                  </td>
+                  <td>
+                    <span className={`badge ${statoBadgeClass(p.stato)}`}>{p.stato}</span>
+                  </td>
+                  <td>{p.quarter_pianificato || "—"}</td>
+                  <td>
+                    <span className="risk-pill risk">⚠ {p.risk.label}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
   );
 }
