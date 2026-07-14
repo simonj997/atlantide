@@ -1,15 +1,18 @@
-import { getProgettiConAllocazioni, getAllocazioniPerPersona } from "../lib/queries";
-import { statoBadgeClass, CAPACITY_PER_PERSONA_GG } from "../lib/risk";
+import { getProgettiConAllocazioni, getAllocazioniPerPersona } from "../../lib/queries";
+import { statoBadgeClass, CAPACITY_PER_PERSONA_GG } from "../../lib/risk";
+import { createSupabaseServerClient } from "../../lib/supabase/server";
 
 export default async function Dashboard() {
+  const supabase = await createSupabaseServerClient();
+
   let progetti = [];
   let personeCapacity = [];
   let errore = null;
 
   try {
     [progetti, personeCapacity] = await Promise.all([
-      getProgettiConAllocazioni(),
-      getAllocazioniPerPersona(),
+      getProgettiConAllocazioni(supabase),
+      getAllocazioniPerPersona(supabase),
     ]);
   } catch (e) {
     errore = e.message || String(e);

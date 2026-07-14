@@ -1,5 +1,6 @@
-import { getProgettiConAllocazioni } from "../../lib/queries";
-import { statoBadgeClass } from "../../lib/risk";
+import { getProgettiConAllocazioni } from "../../../lib/queries";
+import { statoBadgeClass } from "../../../lib/risk";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 function formatData(valore) {
   if (!valore) return "—";
@@ -7,11 +8,13 @@ function formatData(valore) {
 }
 
 export default async function ProgettiPage() {
+  const supabase = await createSupabaseServerClient();
+
   let progetti = [];
   let errore = null;
 
   try {
-    progetti = await getProgettiConAllocazioni();
+    progetti = await getProgettiConAllocazioni(supabase);
   } catch (e) {
     errore = e.message || String(e);
   }

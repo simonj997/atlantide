@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "../lib/supabase/client";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "▤" },
@@ -12,9 +13,17 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
-    <div className="sidebar">
+    <div className="sidebar" style={{ display: "flex", flexDirection: "column" }}>
       <div className="brand">
         <span className="mark"></span>Atlantide
       </div>
@@ -28,6 +37,10 @@ export default function Sidebar() {
           {item.label}
         </Link>
       ))}
+      <div style={{ flex: 1 }}></div>
+      <div className="nav-item" onClick={handleLogout}>
+        <span className="nav-icon">↪</span>Esci
+      </div>
     </div>
   );
 }

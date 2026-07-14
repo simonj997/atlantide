@@ -1,12 +1,15 @@
-import { getAllocazioniPerPersona } from "../../lib/queries";
-import { CAPACITY_PER_PERSONA_GG, SOGLIA_CAPACITY_PERCENT, capacityBarClass } from "../../lib/risk";
+import { getAllocazioniPerPersona } from "../../../lib/queries";
+import { CAPACITY_PER_PERSONA_GG, SOGLIA_CAPACITY_PERCENT, capacityBarClass } from "../../../lib/risk";
+import { createSupabaseServerClient } from "../../../lib/supabase/server";
 
 export default async function CapacityPage() {
+  const supabase = await createSupabaseServerClient();
+
   let persone = [];
   let errore = null;
 
   try {
-    persone = await getAllocazioniPerPersona();
+    persone = await getAllocazioniPerPersona(supabase);
   } catch (e) {
     errore = e.message || String(e);
   }
