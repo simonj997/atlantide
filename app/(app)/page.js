@@ -32,9 +32,11 @@ export default async function Dashboard() {
   }
 
   const progettiAttivi = progetti.filter(
-    (p) => p.stato !== "Live" && p.stato !== "Completato"
+    (p) => p.stato !== "Done" && p.stato !== "Cancelled"
   );
-  const progettiARischio = progetti.filter((p) => p.risk.level === "risk");
+  const progettiARischio = progetti.filter(
+    (p) => p.pianificazione.level === "risk" || p.tipoRitardo === "Ritardo Critico"
+  );
   const effortAllocatoTotale = progetti.reduce((somma, p) => somma + p.effortTot, 0);
 
   const capacityTotale = personeCapacity.length * CAPACITY_PER_PERSONA_GG;
@@ -111,7 +113,10 @@ export default async function Dashboard() {
                   </td>
                   <td>{p.quarter_pianificato || "—"}</td>
                   <td>
-                    <span className="risk-pill risk">⚠ {p.risk.label}</span>
+                    <span className={`risk-pill ${p.pianificazione.level}`}>
+                      {p.pianificazione.label}
+                      {p.tipoRitardo === "Ritardo Critico" ? " — Ritardo Critico" : ""}
+                    </span>
                   </td>
                 </tr>
               ))}

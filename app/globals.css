@@ -282,6 +282,16 @@ tbody tr:hover {
   color: #B7C0DA;
 }
 
+.badge.st-hold {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.badge.st-cancelled {
+  background: rgba(143, 161, 196, 0.12);
+  color: var(--muted);
+}
+
 .risk-pill {
   display: inline-flex;
   align-items: center;
