@@ -6,6 +6,7 @@ import Link from "next/link";
 import { statoBadgeClass } from "../lib/risk";
 import { updateProgettoInline } from "../lib/actions";
 import { EFFORT_BUCKETS, DRIVER_OPTIONS, STATO_OPTIONS, PRIORITA_OPTIONS } from "../lib/regole";
+import MultiSelectFilter from "./MultiSelectFilter";
 
 function formatData(valore) {
   if (!valore) return "—";
@@ -42,11 +43,11 @@ export default function ProgettiTable({ progetti }) {
   const [salvando, setSalvando] = useState({});
   const [filtri, setFiltri] = useState({
     testo: "",
-    prodotto: "",
-    stato: "",
-    priorita: "",
-    owner: "",
-    driver: "",
+    prodotto: [],
+    stato: [],
+    priorita: [],
+    owner: [],
+    driver: [],
   });
 
   const aree = useMemo(() => {
@@ -69,11 +70,6 @@ export default function ProgettiTable({ progetti }) {
 
   const progettiFiltrati = useMemo(() => {
     const testo = filtri.testo.trim().toLowerCase();
-    const prodotto = filtri.prodotto.trim().toLowerCase();
-    const stato = filtri.stato.trim().toLowerCase();
-    const priorita = filtri.priorita.trim().toLowerCase();
-    const owner = filtri.owner.trim().toLowerCase();
-    const driver = filtri.driver.trim().toLowerCase();
 
     return progetti.filter((p) => {
       if (areaSelezionata !== "Tutte" && p.area !== areaSelezionata) return false;
@@ -82,12 +78,15 @@ export default function ProgettiTable({ progetti }) {
         !`${p.id_progetto} ${p.descrizione || ""}`.toLowerCase().includes(testo)
       )
         return false;
-      if (prodotto && !(p.prodotto || []).join(", ").toLowerCase().includes(prodotto))
+      if (
+        filtri.prodotto.length > 0 &&
+        !(p.prodotto || []).some((v) => filtri.prodotto.includes(v))
+      )
         return false;
-      if (stato && !(p.stato || "").toLowerCase().includes(stato)) return false;
-      if (priorita && !(p.priorita || "").toLowerCase().includes(priorita)) return false;
-      if (owner && !(p.owner_progetto || "").toLowerCase().includes(owner)) return false;
-      if (driver && !(p.driver || "").toLowerCase().includes(driver)) return false;
+      if (filtri.stato.length > 0 && !filtri.stato.includes(p.stato)) return false;
+      if (filtri.priorita.length > 0 && !filtri.priorita.includes(p.priorita)) return false;
+      if (filtri.owner.length > 0 && !filtri.owner.includes(p.owner_progetto)) return false;
+      if (filtri.driver.length > 0 && !filtri.driver.includes(p.driver)) return false;
       return true;
     });
   }, [progetti, areaSelezionata, filtri]);
@@ -193,80 +192,40 @@ export default function ProgettiTable({ progetti }) {
                 />
               </th>
               <th>
-                <input
-                  type="text"
-                  list="filtro-prodotto"
-                  placeholder="Filtra..."
-                  value={filtri.prodotto}
-                  onChange={(e) => aggiornaFiltro("prodotto", e.target.value)}
-                  style={filterInputStyle}
+                <MultiSelectFilter
+                  options={suggerimenti.prodotto}
+                  selected={filtri.prodotto}
+                  onChange={(v) => aggiornaFiltro("prodotto", v)}
                 />
-                <datalist id="filtro-prodotto">
-                  {suggerimenti.prodotto.map((v) => (
-                    <option key={v} value={v} />
-                  ))}
-                </datalist>
               </th>
               <th>
-                <input
-                  type="text"
-                  list="filtro-stato"
-                  placeholder="Filtra..."
-                  value={filtri.stato}
-                  onChange={(e) => aggiornaFiltro("stato", e.target.value)}
-                  style={filterInputStyle}
+                <MultiSelectFilter
+                  options={STATO_OPTIONS}
+                  selected={filtri.stato}
+                  onChange={(v) => aggiornaFiltro("stato", v)}
                 />
-                <datalist id="filtro-stato">
-                  {STATO_OPTIONS.map((v) => (
-                    <option key={v} value={v} />
-                  ))}
-                </datalist>
               </th>
               <th>
-                <input
-                  type="text"
-                  list="filtro-priorita"
-                  placeholder="Filtra..."
-                  value={filtri.priorita}
-                  onChange={(e) => aggiornaFiltro("priorita", e.target.value)}
-                  style={filterInputStyle}
+                <MultiSelectFilter
+                  options={PRIORITA_OPTIONS}
+                  selected={filtri.priorita}
+                  onChange={(v) => aggiornaFiltro("priorita", v)}
                 />
-                <datalist id="filtro-priorita">
-                  {PRIORITA_OPTIONS.map((v) => (
-                    <option key={v} value={v} />
-                  ))}
-                </datalist>
               </th>
               <th></th>
               <th>
-                <input
-                  type="text"
-                  list="filtro-driver"
-                  placeholder="Filtra..."
-                  value={filtri.driver}
-                  onChange={(e) => aggiornaFiltro("driver", e.target.value)}
-                  style={filterInputStyle}
+                <MultiSelectFilter
+                  options={DRIVER_OPTIONS}
+                  selected={filtri.driver}
+                  onChange={(v) => aggiornaFiltro("driver", v)}
                 />
-                <datalist id="filtro-driver">
-                  {DRIVER_OPTIONS.map((v) => (
-                    <option key={v} value={v} />
-                  ))}
-                </datalist>
               </th>
               <th>
-                <input
-                  type="text"
-                  list="filtro-owner"
-                  placeholder="Filtra..."
-                  value={filtri.owner}
-                  onChange={(e) => aggiornaFiltro("owner", e.target.value)}
-                  style={filterInputStyle}
+                <MultiSelectFilter
+                  options={suggerimenti.owner}
+                  selected={filtri.owner}
+                  onChange={(v) => aggiornaFiltro("owner", v)}
                 />
-                <datalist id="filtro-owner">
-                  {suggerimenti.owner.map((v) => (
-                    <option key={v} value={v} />
-                  ))}
-                </datalist>
               </th>
               <th colSpan={9}></th>
             </tr>
