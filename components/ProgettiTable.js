@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { statoBadgeClass } from "../lib/risk";
 
 function formatData(valore) {
@@ -67,12 +68,13 @@ export default function ProgettiTable({ progetti }) {
               <th>Tipo Ritardo</th>
               <th>Critico</th>
               <th>JIRA</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {progettiFiltrati.length === 0 ? (
               <tr>
-                <td colSpan={16} style={{ color: "var(--muted)" }}>
+                <td colSpan={17} style={{ color: "var(--muted)" }}>
                   Nessun progetto trovato.
                 </td>
               </tr>
@@ -116,6 +118,11 @@ export default function ProgettiTable({ progetti }) {
                   </td>
                   <td>{p.critico_per_business ? <span className="risk-pill risk">⚠ Critico</span> : "—"}</td>
                   <td>{p.jira_code || "—"}</td>
+                  <td>
+                    <Link href={`/progetti/${p.id_progetto}`} style={{ color: "var(--accent)" }}>
+                      Modifica
+                    </Link>
+                  </td>
                 </tr>
               ))
             )}
