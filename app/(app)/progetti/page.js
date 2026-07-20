@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getProgettiConAllocazioni } from "../../../lib/queries";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
 import ProgettiTable from "../../../components/ProgettiTable";
@@ -36,6 +37,9 @@ export default async function ProgettiPage() {
             Tutti i progetti monitorati, con effort aggregato dalle allocazioni per risorsa
           </div>
         </div>
+        <Link href="/progetti/nuovo" className="btn">
+          + Nuovo progetto
+        </Link>
       </div>
       <ProgettiTable progetti={progetti} />
     </>

@@ -1,15 +1,20 @@
-import { getAllocazioniPerPersona } from "../../../lib/queries";
+import { getAllocazioniPerPersona, getDatiAllocazioniManager } from "../../../lib/queries";
 import { CAPACITY_PER_PERSONA_GG, SOGLIA_CAPACITY_PERCENT, capacityBarClass } from "../../../lib/risk";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
+import AllocazioniManager from "../../../components/AllocazioniManager";
 
 export default async function CapacityPage() {
   const supabase = await createSupabaseServerClient();
 
   let persone = [];
+  let datiManager = { progettiOpzioni: [], risorseOpzioni: [], allocazioni: [] };
   let errore = null;
 
   try {
-    persone = await getAllocazioniPerPersona(supabase);
+    [persone, datiManager] = await Promise.all([
+      getAllocazioniPerPersona(supabase),
+      getDatiAllocazioniManager(supabase),
+    ]);
   } catch (e) {
     errore = e.message || String(e);
   }
@@ -70,6 +75,12 @@ export default async function CapacityPage() {
           })
         )}
       </div>
+
+      <AllocazioniManager
+        progettiOpzioni={datiManager.progettiOpzioni}
+        risorseOpzioni={datiManager.risorseOpzioni}
+        allocazioni={datiManager.allocazioni}
+      />
     </>
   );
 }

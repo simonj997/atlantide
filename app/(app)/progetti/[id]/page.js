@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server";
-import EditProgettoForm from "../../../../components/EditProgettoForm";
+import ProgettoForm from "../../../../components/ProgettoForm";
 
 export default async function ModificaProgettoPage({ params }) {
   const { id } = await params;
@@ -36,7 +36,7 @@ export default async function ModificaProgettoPage({ params }) {
           ← Torna a Progetti
         </Link>
       </div>
-      <EditProgettoForm progetto={progetto} />
+      <ProgettoForm modalita="modifica" progetto={progetto} />
     </>
   );
 }
