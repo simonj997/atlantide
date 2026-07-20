@@ -1,20 +1,15 @@
-import { getAllocazioniPerPersona, getDatiAllocazioniManager } from "../../../lib/queries";
+import { getAllocazioniPerPersona } from "../../../lib/queries";
 import { CAPACITY_PER_PERSONA_GG, SOGLIA_CAPACITY_PERCENT, capacityBarClass } from "../../../lib/risk";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
-import AllocazioniManager from "../../../components/AllocazioniManager";
 
 export default async function CapacityPage() {
   const supabase = await createSupabaseServerClient();
 
   let persone = [];
-  let datiManager = { progettiOpzioni: [], risorseOpzioni: [], allocazioni: [] };
   let errore = null;
 
   try {
-    [persone, datiManager] = await Promise.all([
-      getAllocazioniPerPersona(supabase),
-      getDatiAllocazioniManager(supabase),
-    ]);
+    persone = await getAllocazioniPerPersona(supabase);
   } catch (e) {
     errore = e.message || String(e);
   }
@@ -23,7 +18,7 @@ export default async function CapacityPage() {
     return (
       <div className="page-head">
         <div>
-          <h1>Risorse &amp; Capacity</h1>
+          <h1>Capacity</h1>
           <div className="sub" style={{ color: "var(--risk)" }}>
             Errore nel caricamento: {errore}
           </div>
@@ -36,7 +31,7 @@ export default async function CapacityPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Risorse &amp; Capacity</h1>
+          <h1>Capacity</h1>
           <div className="sub">
             Effort pianificato vs. capacity di riferimento ({CAPACITY_PER_PERSONA_GG} gg/persona —
             valore provvisorio, regolabile in futuro)
@@ -75,12 +70,6 @@ export default async function CapacityPage() {
           })
         )}
       </div>
-
-      <AllocazioniManager
-        progettiOpzioni={datiManager.progettiOpzioni}
-        risorseOpzioni={datiManager.risorseOpzioni}
-        allocazioni={datiManager.allocazioni}
-      />
     </>
   );
 }

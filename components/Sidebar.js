@@ -7,7 +7,8 @@ import { createSupabaseBrowserClient } from "../lib/supabase/client";
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "▤" },
   { href: "/progetti", label: "Progetti", icon: "☰" },
-  { href: "/capacity", label: "Risorse & Capacity", icon: "👥" },
+  { href: "/capacity", label: "Capacity", icon: "👥" },
+  { href: "/allocazioni", label: "Allocazioni", icon: "🔗" },
   { href: "/regole", label: "Regole", icon: "⚙" },
 ];
 
